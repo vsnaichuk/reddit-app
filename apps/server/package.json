@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon dist/index.js",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "orm:migration": "mikro-orm migration:create",
+    "orm:fresh": "mikro-orm schema:fresh --run"
   },
   "dependencies": {
     "@mikro-orm/cli": "^5.1.4",
@@ -21,12 +23,13 @@
     "dotenv-safe": "^8.2.0",
     "express": "^4.18.1",
     "express-session": "^1.17.3",
-    "graphql": "^16.5.0",
+    "graphql": "15.7.2",
     "ioredis": "^5.0.5",
     "nanoid": "^3.3.4",
     "nodemailer": "^6.7.5",
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
+    "ts-node": "^10.8.0",
     "type-graphql": "^1.1.1",
     "typeorm": "^0.3.6"
   },
@@ -37,6 +40,7 @@
     "typescript": "^4.6.4"
   },
   "mikro-orm": {
+    "useTsNode": true,
     "configPaths": [
       "./src/mikro-orm.config.ts",
       "./dist/mikro-orm.config.js"
