@@ -1,5 +1,5 @@
 {
-  "name": "solito-blank",
+  "name": "reddit-app",
   "private": true,
   "workspaces": [
     "apps/*",
