@@ -8,6 +8,10 @@ import { buildSchema } from 'type-graphql';
 import { HelloResolver } from './resolvers/hello';
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
+import Redis from 'ioredis';
+import session from 'express-session';
+import connectRedis from 'connect-redis';
+import { PRODUCTION } from './constants';
 
 const init = async () => {
   const orm = await MikroORM.init<PostgreSqlDriver>(mikroConfig);
@@ -16,13 +20,39 @@ const init = async () => {
 
   const app = express();
 
+  const RedisStore = connectRedis(session);
+  let redisClient = new Redis();
+
+  app.use(
+    session({
+      name: 'qid',
+      store: new RedisStore({
+        client: redisClient,
+        // TODO: Only for dev
+        disableTouch: true,
+      }),
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24,
+        httpOnly: true,
+        sameSite: 'lax', // protection
+        secure: PRODUCTION, // cookie will work in https
+      },
+      saveUninitialized: false,
+      // TODO: Add to env
+      secret: 'keyboard cat',
+      resave: false,
+    }),
+  );
+
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: () => ({
+    context: ({ req, res }) => ({
       em: orm.em,
+      req,
+      res,
     }),
   });
 

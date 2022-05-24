@@ -123,6 +123,9 @@ export class UserResolver {
       };
     }
 
+    // TODO: fix types
+    ctx.req!.session!.userId = user.id;
+
     return {
       user,
     };

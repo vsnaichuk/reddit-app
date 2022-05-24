@@ -11,4 +11,6 @@ import {
 export type ApolloContextType = {
   em: SqlEntityManager<PostgreSqlDriver> &
     EntityManager<IDatabaseDriver<Connection>>;
+  req: Request;
+  res: Response;
 };
