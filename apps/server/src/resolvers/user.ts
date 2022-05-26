@@ -6,6 +6,7 @@ import {
   InputType,
   Mutation,
   ObjectType,
+  Query,
   Resolver,
 } from 'type-graphql';
 import { User } from '../entities/User';
@@ -37,6 +38,20 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() ctx: ApolloContextType) {
+    // You are not logged in
+    if (!ctx.req.session.id) {
+      return null;
+    }
+
+    const user = await ctx.em.findOne(User, {
+      id: ctx.req.session.id,
+    });
+
+    return user;
+  }
+
   @Mutation(() => UserResponse)
   async register(
     @Arg('options') options: UsernamePasswordInput,
@@ -123,8 +138,9 @@ export class UserResolver {
       };
     }
 
-    // TODO: fix types
-    ctx.req!.session!.userId = user.id;
+    // Store user id session
+    // this will set cookie and keep user logged in
+    ctx.req.session.id = user.id;
 
     return {
       user,

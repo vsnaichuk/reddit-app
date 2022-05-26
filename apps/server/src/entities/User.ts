@@ -1,13 +1,13 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
-import { Field, Int, ObjectType } from 'type-graphql';
+import { Field, ObjectType } from 'type-graphql';
 import { BaseEntity } from 'typeorm';
 
 @ObjectType()
 @Entity()
 export class User extends BaseEntity {
-  @Field(() => Int)
+  @Field(() => String)
   @PrimaryKey()
-  id!: number;
+  id!: string;
 
   @Field(() => String)
   @Property({ type: 'date' })

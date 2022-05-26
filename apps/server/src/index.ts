@@ -11,7 +11,7 @@ import { UserResolver } from './resolvers/user';
 import Redis from 'ioredis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
-import { PRODUCTION } from './constants';
+import { __prod__ } from './constants';
 
 const init = async () => {
   const orm = await MikroORM.init<PostgreSqlDriver>(mikroConfig);
@@ -35,7 +35,7 @@ const init = async () => {
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: true,
         sameSite: 'lax', // protection
-        secure: PRODUCTION, // cookie will work in https
+        secure: __prod__, // cookie will work in https
       },
       saveUninitialized: false,
       // TODO: Add to env

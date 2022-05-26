@@ -1,6 +1,6 @@
 import { Options } from '@mikro-orm/core';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { PRODUCTION } from './constants';
+import { __prod__ } from './constants';
 import path from 'path';
 import { Post } from './entities/Post';
 import { User } from './entities/User';
@@ -13,7 +13,7 @@ const mikroConfig: Options<PostgreSqlDriver> = {
   entities: [Post, User],
   type: 'postgresql',
   dbName: 'reddit',
-  debug: !PRODUCTION,
+  debug: !__prod__,
   // If you create username and pass
   // user: '',
   // password: '',
