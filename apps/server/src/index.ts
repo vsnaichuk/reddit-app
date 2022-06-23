@@ -26,8 +26,6 @@ import { UserResolver } from './resolvers/user';
 
   const redisClient = new Redis();
   const RedisStore = connectRedis(session);
-  //TODO: try ioredis instead redis
-  // const redisClient = new Redis();
 
   // Uses express-session to manage cookies
   app.use(
