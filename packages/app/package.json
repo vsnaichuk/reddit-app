@@ -7,8 +7,11 @@
     "@react-navigation/native-stack": "^6.5.0",
     "dripsy": "^3.6.0",
     "expo-linking": "^3.0.0",
+    "formik": "^2.2.9",
+    "graphql": "^16.5.0",
     "moti": "canary",
-    "solito": "latest"
+    "solito": "latest",
+    "urql": "^2.2.1"
   },
   "sideEffects": false
 }

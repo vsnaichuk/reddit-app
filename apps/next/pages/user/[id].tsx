@@ -1,3 +1,3 @@
-import { UserDetailScreen } from 'app/features/user/detail-screen'
+import { RegisterScreen } from 'app/features/user/register-screen';
 
-export default UserDetailScreen
+export default RegisterScreen;

@@ -1,17 +1,13 @@
-import {
-  PostgreSqlDriver,
-  SqlEntityManager,
-} from '@mikro-orm/postgresql';
-import {
-  EntityManager,
-  IDatabaseDriver,
-  Connection,
-} from '@mikro-orm/core';
+import { PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/core';
 import { Session } from 'express-session';
 
+type RequestType = Request & {
+  session: Session & { userId: string };
+};
+
 export type ApolloContextType = {
-  em: SqlEntityManager<PostgreSqlDriver> &
-    EntityManager<IDatabaseDriver<Connection>>;
-  req: Request & { session: Session };
+  em: EntityManager<PostgreSqlDriver>;
+  req: RequestType;
   res: Response;
 };

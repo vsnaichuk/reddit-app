@@ -11,6 +11,7 @@ import {
 } from 'type-graphql';
 import { User } from '../entities/User';
 import { ApolloContextType } from '../types';
+import { v4 as uuidv4 } from 'uuid';
 
 @InputType()
 class UsernamePasswordInput {
@@ -40,15 +41,14 @@ class UserResponse {
 export class UserResolver {
   @Query(() => User, { nullable: true })
   async me(@Ctx() ctx: ApolloContextType) {
-    // You are not logged in
-    if (!ctx.req.session.id) {
+    // you are not logged in
+    if (!ctx.req.session.userId) {
       return null;
     }
 
     const user = await ctx.em.findOne(User, {
-      id: ctx.req.session.id,
+      id: ctx.req.session.userId,
     });
-
     return user;
   }
 
@@ -81,9 +81,11 @@ export class UserResolver {
 
     const hashedPassword = await argon2.hash(options.password);
     const user = ctx.em.create(User, {
+      id: uuidv4(),
       username: options.username,
       password: hashedPassword,
     });
+
     try {
       await ctx.em.persistAndFlush(user);
     } catch (err) {
@@ -140,10 +142,8 @@ export class UserResolver {
 
     // Store user id session
     // this will set cookie and keep user logged in
-    ctx.req.session.id = user.id;
+    ctx.req.session.userId = user.id;
 
-    return {
-      user,
-    };
+    return { user };
   }
 }

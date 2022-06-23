@@ -4,10 +4,11 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon dist/index.js",
     "watch": "tsc -w",
     "orm:migration": "mikro-orm migration:create",
-    "orm:fresh": "mikro-orm schema:fresh --run"
+    "orm:fresh": "mikro-orm schema:fresh --run",
+    "redis": "redis-server",
+    "dev": "nodemon dist/index.js"
   },
   "dependencies": {
     "@mikro-orm/cli": "^5.1.4",
@@ -18,29 +19,28 @@
     "app": "*",
     "argon2": "^0.28.5",
     "connect-redis": "^6.1.3",
-    "cors": "^2.8.5",
     "dataloader": "^2.1.0",
     "dotenv-safe": "^8.2.0",
     "express": "^4.18.1",
     "express-session": "^1.17.3",
     "graphql": "15.7.2",
     "ioredis": "^5.0.5",
-    "nanoid": "^3.3.4",
     "nodemailer": "^6.7.5",
     "pg": "^8.7.3",
-    "redis": "^4.1.0",
     "reflect-metadata": "^0.1.13",
     "ts-node": "^10.8.0",
     "type-graphql": "^1.1.1",
-    "typeorm": "^0.3.6"
+    "typeorm": "^0.3.6",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/connect-redis": "^0.0.18",
     "@types/express": "^4.17.13",
     "@types/express-session": "^1.17.4",
+    "@types/uuid": "^8.3.4",
     "@types/node": "^17.0.35",
     "nodemon": "^2.0.16",
-    "typescript": "^4.6.4"
+    "typescript": "^4.6.2"
   },
   "mikro-orm": {
     "useTsNode": true,

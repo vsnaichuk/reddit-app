@@ -1,28 +1,30 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { HomeScreen } from '../../features/home/screen'
-import { UserDetailScreen } from '../../features/user/detail-screen'
-import { SettingsScreen } from '../../features/user/settings-screen'
+import { RegisterScreen } from '../../features/user/register-screen';
+// import { HomeScreen } from '../../features/home/screen';
+// import { UserDetailScreen } from '../../features/user/detail-screen';
+// import { SettingsScreen } from '../../features/user/settings-screen';
 
 const Stack = createNativeStackNavigator<{
-  home: undefined
-  'user-detail': {
-    id: string
-  },
-  settings: undefined
-}>()
+  register: undefined;
+  // home: undefined
+  // 'user-detail': {
+  //   id: string
+  // },
+  // settings: undefined
+}>();
 
 export function NativeNavigation() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="home"
-        component={HomeScreen}
+        name="register"
+        component={RegisterScreen}
         options={{
-          title: 'Home',
+          title: 'Register',
         }}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="user-detail"
         component={UserDetailScreen}
         options={{
@@ -35,7 +37,7 @@ export function NativeNavigation() {
         options={{
           title: 'Settings',
         }}
-      />
+      /> */}
     </Stack.Navigator>
-  )
+  );
 }
