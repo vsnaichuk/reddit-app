@@ -2,16 +2,9 @@ import { styled } from 'dripsy';
 import React from 'react';
 import { View, Button } from 'react-native';
 import { FormikValues, Formik } from 'formik';
-import { createClient, Provider, useMutation } from 'urql';
+import { useMutation } from 'urql';
 
 import { Field, Separator } from 'app/components';
-
-const client = createClient({
-  url: 'http://localhost:4001/graphql',
-  fetchOptions: {
-    credentials: 'include',
-  },
-});
 
 export const Container = styled(View)({
   flex: 1,
@@ -29,11 +22,30 @@ const FormContainer = styled(View)({
   borderRadius: 20,
 });
 
-export function RegisterScreen() {
-  const [] = useMutation(``);
+const REGISTER_MUT = `
+  mutation Register($username: String!, $password: String!) {
+    register(options: { username: $username, password: $password }) {
+      errors {
+        field
+        message
+      }
+      user {
+        id
+        createdAt
+        updateAt
+        username
+      }
+    }
+  }
+`;
 
-  function onSubmit() {
+export function RegisterScreen() {
+  const [, register] = useMutation(REGISTER_MUT);
+
+  // TODO: Add better typing for values
+  function onSubmit(values: FormikValues) {
     console.log('submit');
+    register(values);
   }
 
   const initialValues: FormikValues = {
@@ -42,37 +54,35 @@ export function RegisterScreen() {
   };
 
   return (
-    <Provider value={client}>
-      <Container>
-        <FormContainer>
-          <Formik initialValues={initialValues} onSubmit={onSubmit}>
-            {({ handleSubmit }) => (
-              <View>
-                <Field
-                  name="username"
-                  label="Username"
-                  placeholder="Type your username"
-                />
+    <Container>
+      <FormContainer>
+        <Formik initialValues={initialValues} onSubmit={onSubmit}>
+          {({ handleSubmit }) => (
+            <View>
+              <Field
+                name="username"
+                label="Username"
+                placeholder="Type your username"
+              />
 
-                <Separator size={2} />
+              <Separator size={2} />
 
-                <Field
-                  name="password"
-                  label="Password"
-                  placeholder="Type your password"
-                />
+              <Field
+                name="password"
+                label="Password"
+                placeholder="Type your password"
+              />
 
-                <Separator size={4} />
+              <Separator size={4} />
 
-                <Button
-                  onPress={handleSubmit as (values: any) => void}
-                  title="Sign up"
-                />
-              </View>
-            )}
-          </Formik>
-        </FormContainer>
-      </Container>
-    </Provider>
+              <Button
+                onPress={handleSubmit as (values: any) => void}
+                title="Sign up"
+              />
+            </View>
+          )}
+        </Formik>
+      </FormContainer>
+    </Container>
   );
 }

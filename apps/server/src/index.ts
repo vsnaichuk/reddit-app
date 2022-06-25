@@ -8,6 +8,7 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import Redis from 'ioredis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
+import cors from 'cors';
 
 import { __prod__ } from './constants';
 import mikroConfig from './mikro-orm.config';
@@ -17,17 +18,34 @@ import { UserResolver } from './resolvers/user';
 
 (async () => {
   const orm = await MikroORM.init<PostgreSqlDriver>(mikroConfig);
-  const migrator = orm.getMigrator();
-  await migrator.up(); // runs migrations up to the latest
 
+  // runs migrations up to the latest
+  const migrator = orm.getMigrator();
+  await migrator.up();
+
+  // init app
   const app = express();
 
+  // setup cors
+  app.use(
+    cors({
+      origin: [
+        'https://studio.apollographql.com',
+        'https://localhost:4001/graphql',
+        'http://localhost:3000',
+      ],
+      credentials: true,
+    }),
+  );
+
+  // helps to resolve X-Forwarded-* header fields
   app.set('trust proxy', true);
 
+  // init redis
   const redisClient = new Redis();
   const RedisStore = connectRedis(session);
 
-  // Uses express-session to manage cookies
+  // uses express-session to manage cookies
   app.use(
     session({
       name: 'qid',
@@ -48,8 +66,8 @@ import { UserResolver } from './resolvers/user';
     }),
   );
 
+  // init apollo
   const apolloServer = new ApolloServer({
-    csrfPrevention: true, // see below for more about this
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
@@ -60,26 +78,24 @@ import { UserResolver } from './resolvers/user';
       res,
       redis: redisClient,
     }),
+    // This will allow POST operations from any client and GET operations from Apollo
+    // Client Web, Apollo iOS, and Apollo Kotlin.
+    csrfPrevention: true,
   });
 
   await apolloServer.start();
 
   apolloServer.applyMiddleware({
     app,
-    cors: {
-      origin: [
-        'https://studio.apollographql.com',
-        'https://localhost:4001/graphql',
-      ],
-      credentials: true,
-    },
+    cors: false, // we using cors package instead
   });
 
-  app.get('/', (_, res) => {
-    res.send('hello');
-  });
+  // for testing
+  // app.get('/', (_, res) => {
+  //   res.send('hello');
+  // });
 
   app.listen(4001, () => {
-    console.log('serv started');
+    console.log('server started');
   });
 })().catch(console.error);
