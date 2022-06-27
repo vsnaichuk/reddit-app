@@ -2,7 +2,9 @@
   "version": "0.0.0",
   "name": "app",
   "main": "index.ts",
+  "sideEffects": false,
   "dependencies": {
+    "@graphql-codegen/typescript-urql": "^3.5.12",
     "@react-navigation/native": "^6.0.8",
     "@react-navigation/native-stack": "^6.5.0",
     "dripsy": "^3.6.0",
@@ -13,5 +15,12 @@
     "solito": "latest",
     "urql": "^2.2.1"
   },
-  "sideEffects": false
+  "devDependencies": {
+    "@graphql-codegen/cli": "2.6.2",
+    "@graphql-codegen/typescript": "2.5.1",
+    "@graphql-codegen/typescript-operations": "2.4.2"
+  },
+  "scripts": {
+    "gen": "graphql-codegen --config codegen.yml"
+  }
 }

@@ -5,6 +5,7 @@ import { FormikValues, Formik } from 'formik';
 import { useMutation } from 'urql';
 
 import { Field, Separator } from 'app/components';
+import { useRegisterMutation } from 'app/generated/graphql';
 
 export const Container = styled(View)({
   flex: 1,
@@ -22,35 +23,23 @@ const FormContainer = styled(View)({
   borderRadius: 20,
 });
 
-const REGISTER_MUT = `
-  mutation Register($username: String!, $password: String!) {
-    register(options: { username: $username, password: $password }) {
-      errors {
-        field
-        message
-      }
-      user {
-        id
-        createdAt
-        updateAt
-        username
-      }
-    }
-  }
-`;
+interface IRegisterProps {
+  username: string;
+  password: string;
+}
 
 export function RegisterScreen() {
-  const [, register] = useMutation(REGISTER_MUT);
+  const [, register] = useRegisterMutation();
 
   // TODO: Add better typing for values
-  function onSubmit(values: FormikValues) {
-    console.log('submit');
-    register(values);
+  async function onSubmit(values: IRegisterProps) {
+    const res = await register(values);
+    console.log(res.data?.register.user?.id);
   }
 
-  const initialValues: FormikValues = {
+  const initialValues: IRegisterProps = {
     username: '',
-    pass: '',
+    password: '',
   };
 
   return (
