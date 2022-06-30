@@ -5,7 +5,7 @@ import { Formik, FormikHelpers } from 'formik';
 
 import { Field, Separator } from 'app/components';
 import {
-  useRegisterMutation,
+  useLoginMutation,
   UsernamePasswordInput,
 } from 'app/generated/graphql';
 import { toErrorMap } from 'app/utils/toErrorMap';
@@ -27,16 +27,16 @@ const FormContainer = styled(View)({
   borderRadius: 20,
 });
 
-export function RegisterScreen() {
+export function LoginScreen() {
   const router = useRouter();
-  const [, register] = useRegisterMutation();
+  const [, login] = useLoginMutation();
 
   async function onSubmit(
     values: UsernamePasswordInput,
     formikHelpers: FormikHelpers<UsernamePasswordInput>,
   ) {
-    const res = await register({ options: values });
-    const errors = res.data?.register.errors;
+    const res = await login({ options: values });
+    const errors = res.data?.login.errors;
 
     if (errors) {
       return formikHelpers.setErrors(toErrorMap(errors));
@@ -74,7 +74,7 @@ export function RegisterScreen() {
 
               <Button
                 onPress={handleSubmit as (values: any) => void}
-                title="Sign up"
+                title="Login"
               />
             </View>
           )}

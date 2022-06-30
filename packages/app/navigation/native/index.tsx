@@ -1,22 +1,31 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+import { LoginScreen } from '../../features/user/login-screen';
 import { RegisterScreen } from '../../features/user/register-screen';
+import { SettingsScreen } from '../../features/user/settings-screen';
 // import { HomeScreen } from '../../features/home/screen';
 // import { UserDetailScreen } from '../../features/user/detail-screen';
-// import { SettingsScreen } from '../../features/user/settings-screen';
 
 const Stack = createNativeStackNavigator<{
+  login: undefined;
   register: undefined;
+  settings: undefined;
   // home: undefined
   // 'user-detail': {
   //   id: string
   // },
-  // settings: undefined
 }>();
 
 export function NativeNavigation() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName="login">
+      <Stack.Screen
+        name="login"
+        component={LoginScreen}
+        options={{
+          title: 'Login',
+        }}
+      />
       <Stack.Screen
         name="register"
         component={RegisterScreen}
@@ -24,18 +33,18 @@ export function NativeNavigation() {
           title: 'Register',
         }}
       />
-      {/* <Stack.Screen
-        name="user-detail"
-        component={UserDetailScreen}
-        options={{
-          title: 'User',
-        }}
-      />
       <Stack.Screen
         name="settings"
         component={SettingsScreen}
         options={{
           title: 'Settings',
+        }}
+      />
+      {/* <Stack.Screen
+        name="user-detail"
+        component={UserDetailScreen}
+        options={{
+          title: 'User',
         }}
       /> */}
     </Stack.Navigator>

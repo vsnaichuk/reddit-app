@@ -11,7 +11,7 @@ import {
 } from 'type-graphql';
 import { User } from '../entities/User';
 import { ApolloContextType } from '../types';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid4 } from 'uuid';
 
 @InputType()
 class UsernamePasswordInput {
@@ -81,7 +81,7 @@ export class UserResolver {
 
     const hashedPassword = await argon2.hash(options.password);
     const user = ctx.em.create(User, {
-      id: uuidv4(),
+      id: uuid4(),
       username: options.username,
       password: hashedPassword,
     });
@@ -89,7 +89,7 @@ export class UserResolver {
     try {
       await ctx.em.persistAndFlush(user);
     } catch (err) {
-      // username already exist
+      // 23505 - username already exist
       if (err.code === '23505') {
         return {
           errors: [
@@ -101,6 +101,11 @@ export class UserResolver {
         };
       }
     }
+
+    // Store user id session
+    // this will set cookie and keep user logged in
+    ctx.req.session.userId = user.id;
+
     return { user };
   }
 
