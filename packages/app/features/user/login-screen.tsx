@@ -42,7 +42,7 @@ export function LoginScreen() {
       return formikHelpers.setErrors(toErrorMap(errors));
     }
 
-    router.push('/settings');
+    router.push('/');
   }
 
   const initialValues: UsernamePasswordInput = {
