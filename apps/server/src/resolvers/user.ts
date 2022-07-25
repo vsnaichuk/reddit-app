@@ -11,6 +11,7 @@ import {
 } from 'type-graphql';
 import { User } from '../entities/User';
 import { ApolloContextType } from '../types';
+import { COOKIE_NAME } from '../constants';
 import { v4 as uuid4 } from 'uuid';
 
 @InputType()
@@ -150,5 +151,24 @@ export class UserResolver {
     ctx.req.session.userId = user.id;
 
     return { user };
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() { req, res }: ApolloContextType) {
+    return new Promise((resolve) =>
+      req.session.destroy((err) => {
+        // TODO: Fix type
+        // @ts-ignore
+        res.clearCookie(COOKIE_NAME);
+
+        if (err) {
+          console.log(err);
+          resolve(false);
+          return;
+        }
+
+        resolve(true);
+      }),
+    );
   }
 }

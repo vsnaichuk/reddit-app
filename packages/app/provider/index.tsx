@@ -13,6 +13,9 @@ const client = createClient({
   url: 'http://localhost:4001/graphql',
   fetchOptions: {
     credentials: 'include',
+    headers: {
+      'X-Forwarded-Proto': 'https',
+    },
   },
   exchanges: [
     dedupExchange,
@@ -20,9 +23,9 @@ const client = createClient({
       updates: {
         Mutation: {
           // TODO: fix types
-          login: (result, args, cache, info) => {
+          login: (result, _, cache) => {
             // @ts-ignore
-            return cache.updateQuery({ query: MeDocument }, () => {
+            cache.updateQuery({ query: MeDocument }, () => {
               // @ts-ignore
               if (result?.register.errors) {
                 return MeDocument;
@@ -32,6 +35,14 @@ const client = createClient({
                   me: result.register.user,
                 };
               }
+            });
+          },
+          logout: (result, _, cache) => {
+            // @ts-ignore
+            cache.updateQuery({ query: MeDocument }, () => {
+              return {
+                me: null,
+              };
             });
           },
         },

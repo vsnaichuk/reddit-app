@@ -10,7 +10,7 @@ import session from 'express-session';
 import connectRedis from 'connect-redis';
 import cors from 'cors';
 
-import { __prod__ } from './constants';
+import { COOKIE_NAME, __prod__ } from './constants';
 import mikroConfig from './mikro-orm.config';
 import { HelloResolver } from './resolvers/hello';
 import { PostResolver } from './resolvers/post';
@@ -26,6 +26,9 @@ import { UserResolver } from './resolvers/user';
   // init app
   const app = express();
 
+  // helps to resolve X-Forwarded-* header fields
+  app.set('trust proxy', true);
+
   // setup cors
   app.use(
     cors({
@@ -38,9 +41,6 @@ import { UserResolver } from './resolvers/user';
     }),
   );
 
-  // helps to resolve X-Forwarded-* header fields
-  app.set('trust proxy', true);
-
   // init redis
   const redisClient = new Redis();
   const RedisStore = connectRedis(session);
@@ -48,10 +48,7 @@ import { UserResolver } from './resolvers/user';
   // uses express-session to manage cookies
   app.use(
     session({
-      name: 'qid',
-      saveUninitialized: false,
-      secret: 'l123sasda131kdfjRANDOMa123adj123haSECRET3f',
-      resave: false,
+      name: COOKIE_NAME,
       store: new RedisStore({
         client: redisClient,
         disableTouch: true,
@@ -60,9 +57,12 @@ import { UserResolver } from './resolvers/user';
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: true, // means that only works on https
+        sameSite: 'lax', // balance between security and usability
       },
+      resave: false,
+      saveUninitialized: false,
+      secret: 'l123sasda131kdfjRANDOMa123adj123haSECRET3f',
     }),
   );
 
