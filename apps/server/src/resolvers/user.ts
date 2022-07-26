@@ -17,6 +17,8 @@ import { v4 as uuid4 } from 'uuid';
 @InputType()
 class UsernamePasswordInput {
   @Field()
+  email: string;
+  @Field()
   username: string;
   @Field()
   password: string;
@@ -40,6 +42,15 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Arg('email') email: string,
+    @Ctx() ctx: ApolloContextType,
+  ) {
+    // const user = await em.findOne(User, { email });
+    return true;
+  }
+
   @Query(() => User, { nullable: true })
   async me(@Ctx() ctx: ApolloContextType) {
     // you are not logged in
@@ -83,6 +94,7 @@ export class UserResolver {
     const hashedPassword = await argon2.hash(options.password);
     const user = ctx.em.create(User, {
       id: uuid4(),
+      email: options.email,
       username: options.username,
       password: hashedPassword,
     });
@@ -112,28 +124,29 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg('options') options: UsernamePasswordInput,
+    @Arg('usernameOrEmail') usernameOrEmail: string,
+    @Arg('password') password: string,
     @Ctx() ctx: ApolloContextType,
   ): Promise<UserResponse> {
-    const user = await ctx.em.findOne(User, {
-      username: options.username,
-    });
+    const user = await ctx.em.findOne(
+      User,
+      usernameOrEmail.includes('@')
+        ? { email: usernameOrEmail }
+        : { username: usernameOrEmail },
+    );
 
     if (!user) {
       return {
         errors: [
           {
-            field: 'username',
+            field: 'usernameOrEmail',
             message: 'That username doe not exist',
           },
         ],
       };
     }
 
-    const valid = await argon2.verify(
-      user.password,
-      options.password,
-    );
+    const valid = await argon2.verify(user.password, password);
 
     if (!valid) {
       return {

@@ -46,6 +46,7 @@ export function RegisterScreen() {
   }
 
   const initialValues: UsernamePasswordInput = {
+    email: '',
     username: '',
     password: '',
   };
@@ -56,6 +57,10 @@ export function RegisterScreen() {
         <Formik initialValues={initialValues} onSubmit={onSubmit}>
           {({ handleSubmit }) => (
             <View>
+              <Field name="email" placeholder="email" label="Email" />
+
+              <Separator size={2} />
+
               <Field
                 name="username"
                 label="Username"

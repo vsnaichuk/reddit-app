@@ -46,7 +46,7 @@ export function LoginScreen() {
   }
 
   const initialValues: UsernamePasswordInput = {
-    username: '',
+    usernameOrEmail: '',
     password: '',
   };
 
@@ -57,9 +57,9 @@ export function LoginScreen() {
           {({ handleSubmit }) => (
             <View>
               <Field
-                name="username"
-                label="Username"
-                placeholder="Type your username"
+                name="usernameOrEmail"
+                placeholder="username or email"
+                label="Username or Email"
               />
 
               <Separator size={2} />
