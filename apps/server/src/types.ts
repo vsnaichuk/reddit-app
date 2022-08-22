@@ -1,5 +1,6 @@
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { EntityManager } from '@mikro-orm/core';
+import { Request, Response } from 'express';
 import { Session } from 'express-session';
 
 type RequestType = Request & {

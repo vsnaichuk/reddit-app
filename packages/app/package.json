@@ -4,7 +4,6 @@
   "main": "index.ts",
   "sideEffects": false,
   "dependencies": {
-    "@graphql-codegen/typescript-urql": "^3.5.12",
     "@react-navigation/native": "^6.0.8",
     "@react-navigation/native-stack": "^6.5.0",
     "@urql/exchange-graphcache": "^4.4.3",
@@ -19,7 +18,9 @@
   "devDependencies": {
     "@graphql-codegen/cli": "2.6.2",
     "@graphql-codegen/typescript": "2.5.1",
-    "@graphql-codegen/typescript-operations": "2.4.2"
+    "@graphql-codegen/typescript-operations": "2.4.2",
+    "@graphql-codegen/typescript-urql": "^3.5.12",
+    "@graphql-codegen/typescript-urql-graphcache": "^2.3.3"
   },
   "scripts": {
     "gen": "graphql-codegen --config codegen.yml"

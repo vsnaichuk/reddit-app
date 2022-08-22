@@ -1,4 +1,4 @@
-import { useMeQuery } from 'app/generated/graphql';
+import { useLogoutMutation, useMeQuery } from 'app/generated/graphql';
 import { styled } from 'dripsy';
 import { View, ViewProps, Text as BaseText } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
@@ -27,9 +27,12 @@ const Button = styled(RectButton)({
 interface ITopNavBarProps extends ViewProps {}
 
 export function TopNavBar(props: ITopNavBarProps) {
+  const [, logout] = useLogoutMutation();
   const [{ data, fetching }] = useMeQuery();
 
-  function logout() {}
+  function onLogout() {
+    logout();
+  }
 
   if (fetching) {
     return <Text>...</Text>;
@@ -53,7 +56,7 @@ export function TopNavBar(props: ITopNavBarProps) {
     <Container {...props}>
       <Text>{data.me.username}</Text>
       <VerticalSeparator />
-      <Button onPress={logout}>Logout</Button>
+      <Button onPress={onLogout}>Logout</Button>
     </Container>
   );
 }

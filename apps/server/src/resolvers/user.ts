@@ -61,6 +61,9 @@ export class UserResolver {
     const user = await ctx.em.findOne(User, {
       id: ctx.req.session.userId,
     });
+
+    console.log(await ctx.em.find(User, {}));
+
     return user;
   }
 
@@ -167,20 +170,21 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  logout(@Ctx() { req, res }: ApolloContextType) {
-    return new Promise((resolve) =>
-      req.session.destroy((err) => {
-        // TODO: Fix type
-        // @ts-ignore
-        res.clearCookie(COOKIE_NAME);
+  logout(@Ctx() ctx: ApolloContextType) {
+    return new Promise((res) =>
+      ctx.req.session.destroy((err) => {
+        ctx.res.clearCookie(COOKIE_NAME, {
+          sameSite: 'none',
+          secure: true,
+        });
 
         if (err) {
           console.log(err);
-          resolve(false);
+          res(false);
           return;
         }
 
-        resolve(true);
+        res(true);
       }),
     );
   }

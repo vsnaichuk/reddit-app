@@ -58,7 +58,8 @@ import { UserResolver } from './resolvers/user';
         maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year
         httpOnly: true,
         secure: true, // means that only works on https
-        sameSite: 'lax', // balance between security and usability
+        // sameSite: 'lax', // lax - balance between security and usability
+        sameSite: 'none', // 'none' - to work with apollo sandbox
       },
       resave: false,
       saveUninitialized: false,

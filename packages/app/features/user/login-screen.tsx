@@ -5,8 +5,8 @@ import { Formik, FormikHelpers } from 'formik';
 
 import { Field, Separator } from 'app/components';
 import {
+  LoginMutationVariables,
   useLoginMutation,
-  UsernamePasswordInput,
 } from 'app/generated/graphql';
 import { toErrorMap } from 'app/utils/toErrorMap';
 import { useRouter } from 'solito/router';
@@ -32,10 +32,10 @@ export function LoginScreen() {
   const [, login] = useLoginMutation();
 
   async function onSubmit(
-    values: UsernamePasswordInput,
-    formikHelpers: FormikHelpers<UsernamePasswordInput>,
+    values: LoginMutationVariables,
+    formikHelpers: FormikHelpers<LoginMutationVariables>,
   ) {
-    const res = await login({ options: values });
+    const res = await login(values);
     const errors = res.data?.login.errors;
 
     if (errors) {
@@ -45,7 +45,7 @@ export function LoginScreen() {
     router.push('/');
   }
 
-  const initialValues: UsernamePasswordInput = {
+  const initialValues: LoginMutationVariables = {
     usernameOrEmail: '',
     password: '',
   };

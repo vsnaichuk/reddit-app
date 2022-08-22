@@ -1,5 +1,10 @@
 import { cacheExchange } from '@urql/exchange-graphcache';
-import { MeDocument } from 'app/generated/graphql';
+import {
+  GraphCacheConfig,
+  MeDocument,
+  WithTypename,
+  User,
+} from 'app/generated/graphql';
 import {
   createClient,
   dedupExchange,
@@ -19,31 +24,24 @@ const client = createClient({
   },
   exchanges: [
     dedupExchange,
-    cacheExchange({
+    cacheExchange<GraphCacheConfig>({
       updates: {
         Mutation: {
-          // TODO: fix types
           login: (result, _, cache) => {
-            // @ts-ignore
             cache.updateQuery({ query: MeDocument }, () => {
-              // @ts-ignore
-              if (result?.register.errors) {
+              if (result?.login.errors) {
                 return MeDocument;
               } else {
                 return {
-                  // @ts-ignore
-                  me: result.register.user,
+                  me: result.login.user,
                 };
               }
             });
           },
           logout: (result, _, cache) => {
-            // @ts-ignore
-            cache.updateQuery({ query: MeDocument }, () => {
-              return {
-                me: null,
-              };
-            });
+            cache.updateQuery({ query: MeDocument }, () => ({
+              me: null,
+            }));
           },
         },
       },
