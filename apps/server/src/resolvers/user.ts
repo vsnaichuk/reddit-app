@@ -11,8 +11,9 @@ import {
 } from 'type-graphql';
 import { User } from '../entities/User';
 import { ApolloContextType } from '../types';
-import { COOKIE_NAME } from '../constants';
-import { v4 as uuid4 } from 'uuid';
+import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../constants';
+import { v4 as uuid } from 'uuid';
+import { sendEmail } from '../utils/sendEmail';
 
 @InputType()
 class UsernamePasswordInput {
@@ -47,7 +48,26 @@ export class UserResolver {
     @Arg('email') email: string,
     @Ctx() ctx: ApolloContextType,
   ) {
-    // const user = await em.findOne(User, { email });
+    const user = await ctx.em.findOne(User, { email });
+    if (!user) {
+      // the email is not in db
+      return true;
+    }
+
+    const token = uuid();
+
+    await ctx.redis.set(
+      FORGET_PASSWORD_PREFIX + token,
+      user.id,
+      'EX',
+      1000 * 60 * 60 * 24 * 3, // 3 days
+    );
+
+    await sendEmail(
+      email,
+      `<a href="http://localhost:3000/change-password/${token}">reset password</a>`,
+    );
+
     return true;
   }
 
@@ -61,8 +81,6 @@ export class UserResolver {
     const user = await ctx.em.findOne(User, {
       id: ctx.req.session.userId,
     });
-
-    console.log(await ctx.em.find(User, {}));
 
     return user;
   }
@@ -96,7 +114,7 @@ export class UserResolver {
 
     const hashedPassword = await argon2.hash(options.password);
     const user = ctx.em.create(User, {
-      id: uuid4(),
+      id: uuid(),
       email: options.email,
       username: options.username,
       password: hashedPassword,
