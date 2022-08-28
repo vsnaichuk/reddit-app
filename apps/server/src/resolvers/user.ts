@@ -44,6 +44,55 @@ class UserResponse {
 @Resolver()
 export class UserResolver {
   @Mutation(() => Boolean)
+  async changePassword(
+    @Arg('token') token: string,
+    @Arg('newPassword') newPassword: string,
+    @Ctx() ctx: ApolloContextType,
+  ) {
+    if (newPassword.length <= 2) {
+      return {
+        errors: [
+          {
+            field: 'newPassword',
+            message: 'length must be greater than 2',
+          },
+        ],
+      };
+    }
+
+    const key = FORGET_PASSWORD_PREFIX + token;
+    const userId = await ctx.redis.get(key);
+    if (!userId) {
+      return {
+        errors: [
+          {
+            field: 'token',
+            message: 'token expired',
+          },
+        ],
+      };
+    }
+
+    const user = await ctx.em.findOne(User, { id: userId });
+
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: 'token',
+            message: 'user no longer exists',
+          },
+        ],
+      };
+    }
+
+    user.password = await argon2.hash(newPassword);
+    ctx.em.persistAndFlush(user);
+
+    return { user };
+  }
+
+  @Mutation(() => Boolean)
   async forgotPassword(
     @Arg('email') email: string,
     @Ctx() ctx: ApolloContextType,
