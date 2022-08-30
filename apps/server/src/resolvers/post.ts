@@ -1,47 +1,37 @@
-import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
+import { Arg, Mutation, Query, Resolver } from 'type-graphql';
 import { Post } from '../entities/Post';
-import { ApolloContextType } from '../types';
 
 @Resolver()
 export class PostResolver {
   @Query(() => [Post])
-  posts(@Ctx() ctx: ApolloContextType): Promise<Post[]> {
-    return ctx.em.find(Post, {});
+  posts(): Promise<Post[]> {
+    return Post.find();
   }
 
   @Query(() => Post, { nullable: true })
-  post(
-    @Arg('id') id: number,
-    @Ctx() ctx: ApolloContextType,
-  ): Promise<Post | null> {
-    return ctx.em.findOne(Post, { id });
+  post(@Arg('id') id: number): Promise<Post | null> {
+    return Post.findOneBy({ id });
   }
 
   @Mutation(() => Post)
-  async createPost(
-    @Arg('title') title: string,
-    @Ctx() ctx: ApolloContextType,
-  ): Promise<Post> {
-    const post = ctx.em.create(Post, { title });
-    await ctx.em.persistAndFlush(post);
-    return post;
+  async createPost(@Arg('title') title: string): Promise<Post> {
+    const newPost = Post.create({ title });
+    return Post.save(newPost);
   }
 
   @Mutation(() => Post, { nullable: true })
   async updatePost(
     @Arg('id') id: number,
     @Arg('title', () => String, { nullable: true }) title: string,
-    @Ctx() ctx: ApolloContextType,
   ): Promise<Post | null> {
-    const post = await ctx.em.findOne(Post, { id });
+    const post = await Post.findOneBy({ id });
 
     if (!post) {
       return null;
     }
 
     if (typeof title !== undefined) {
-      post.title = title;
-      await ctx.em.persistAndFlush(post);
+      await Post.update({ id }, { title });
     }
 
     return post;

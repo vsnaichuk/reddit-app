@@ -2,26 +2,20 @@ import 'reflect-metadata';
 
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
-import { MikroORM } from '@mikro-orm/core';
 import { buildSchema } from 'type-graphql';
-import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import Redis from 'ioredis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
 import cors from 'cors';
 
 import { COOKIE_NAME, __prod__ } from './constants';
-import mikroConfig from './mikro-orm.config';
 import { HelloResolver } from './resolvers/hello';
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
+import { appDataSource } from './appDataSource';
 
 (async () => {
-  const orm = await MikroORM.init<PostgreSqlDriver>(mikroConfig);
-
-  // runs migrations up to the latest
-  const migrator = orm.getMigrator();
-  await migrator.up();
+  appDataSource.initialize();
 
   // init app
   const app = express();
@@ -42,7 +36,7 @@ import { UserResolver } from './resolvers/user';
   );
 
   // init redis
-  const redisClient = new Redis();
+  const redis = new Redis();
   const RedisStore = connectRedis(session);
 
   // uses express-session to manage cookies
@@ -50,7 +44,7 @@ import { UserResolver } from './resolvers/user';
     session({
       name: COOKIE_NAME,
       store: new RedisStore({
-        client: redisClient,
+        client: redis,
         disableTouch: true,
         disableTTL: true,
       }),
@@ -74,10 +68,9 @@ import { UserResolver } from './resolvers/user';
       validate: false,
     }),
     context: ({ req, res }) => ({
-      em: orm.em,
       req,
       res,
-      redis: redisClient,
+      redis,
     }),
     // This will allow POST operations from any client and GET operations from Apollo
     // Client Web, Apollo iOS, and Apollo Kotlin.

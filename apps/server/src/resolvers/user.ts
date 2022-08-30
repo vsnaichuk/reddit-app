@@ -73,7 +73,7 @@ export class UserResolver {
       };
     }
 
-    const user = await ctx.em.findOne(User, { id: userId });
+    const user = await User.findOneBy({ id: userId });
 
     if (!user) {
       return {
@@ -86,8 +86,10 @@ export class UserResolver {
       };
     }
 
-    user.password = await argon2.hash(newPassword);
-    ctx.em.persistAndFlush(user);
+    User.update(
+      { id: userId },
+      { password: await argon2.hash(newPassword) },
+    );
 
     return { user };
   }
@@ -97,7 +99,7 @@ export class UserResolver {
     @Arg('email') email: string,
     @Ctx() ctx: ApolloContextType,
   ) {
-    const user = await ctx.em.findOne(User, { email });
+    const user = await User.findOneBy({ email });
     if (!user) {
       // the email is not in db
       return true;
@@ -121,17 +123,15 @@ export class UserResolver {
   }
 
   @Query(() => User, { nullable: true })
-  async me(@Ctx() ctx: ApolloContextType) {
+  me(@Ctx() ctx: ApolloContextType) {
     // you are not logged in
     if (!ctx.req.session.userId) {
       return null;
     }
 
-    const user = await ctx.em.findOne(User, {
+    return User.findOneBy({
       id: ctx.req.session.userId,
     });
-
-    return user;
   }
 
   @Mutation(() => UserResponse)
@@ -162,15 +162,16 @@ export class UserResolver {
     }
 
     const hashedPassword = await argon2.hash(options.password);
-    const user = ctx.em.create(User, {
-      id: uuid(),
-      email: options.email,
-      username: options.username,
-      password: hashedPassword,
-    });
+
+    let user;
 
     try {
-      await ctx.em.persistAndFlush(user);
+      user = User.create({
+        id: uuid(),
+        email: options.email,
+        username: options.username,
+        password: hashedPassword,
+      }).save();
     } catch (err) {
       // 23505 - username already exist
       if (err.code === '23505') {
@@ -187,7 +188,7 @@ export class UserResolver {
 
     // Store user id session
     // this will set cookie and keep user logged in
-    ctx.req.session.userId = user.id;
+    // ctx.req.session.userId = user.id;
 
     return { user };
   }
@@ -198,8 +199,7 @@ export class UserResolver {
     @Arg('password') password: string,
     @Ctx() ctx: ApolloContextType,
   ): Promise<UserResponse> {
-    const user = await ctx.em.findOne(
-      User,
+    const user = await User.findOneBy(
       usernameOrEmail.includes('@')
         ? { email: usernameOrEmail }
         : { username: usernameOrEmail },
