@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { Field, Int, ObjectType } from 'type-graphql';
 import {
   BaseEntity,
@@ -10,7 +10,7 @@ import {
 @Entity()
 export class Post extends BaseEntity {
   @Field(() => Int)
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id!: number;
 
   @Field(() => String)

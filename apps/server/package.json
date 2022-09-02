@@ -5,8 +5,6 @@
   "main": "index.js",
   "scripts": {
     "watch": "tsc -w",
-    "orm:migration": "mikro-orm migration:create",
-    "orm:fresh": "mikro-orm schema:fresh --run",
     "redis": "redis-server",
     "dev": "nodemon dist/index.js"
   },

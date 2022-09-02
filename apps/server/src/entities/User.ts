@@ -1,7 +1,7 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -12,7 +12,7 @@ import { BaseEntity } from 'typeorm';
 @Entity()
 export class User extends BaseEntity {
   @Field(() => String)
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id!: string;
 
   @Field(() => String)

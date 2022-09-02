@@ -163,7 +163,7 @@ export class UserResolver {
 
     const hashedPassword = await argon2.hash(options.password);
 
-    let user;
+    let user: User | undefined;
 
     try {
       user = User.create({
@@ -171,7 +171,9 @@ export class UserResolver {
         email: options.email,
         username: options.username,
         password: hashedPassword,
-      }).save();
+      });
+
+      User.save(user);
     } catch (err) {
       // 23505 - username already exist
       if (err.code === '23505') {
@@ -186,9 +188,11 @@ export class UserResolver {
       }
     }
 
-    // Store user id session
-    // this will set cookie and keep user logged in
-    // ctx.req.session.userId = user.id;
+    if (user) {
+      // Store user id session
+      // this will set cookie and keep user logged in
+      ctx.req.session.userId = user.id;
+    }
 
     return { user };
   }
