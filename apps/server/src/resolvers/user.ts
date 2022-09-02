@@ -167,7 +167,6 @@ export class UserResolver {
 
     try {
       user = User.create({
-        id: uuid(),
         email: options.email,
         username: options.username,
         password: hashedPassword,

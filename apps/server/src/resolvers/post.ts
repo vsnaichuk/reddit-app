@@ -1,5 +1,24 @@
-import { Arg, Mutation, Query, Resolver } from 'type-graphql';
+import {
+  Arg,
+  Ctx,
+  Field,
+  InputType,
+  Mutation,
+  Query,
+  Resolver,
+  UseMiddleware,
+} from 'type-graphql';
+import { isAuth } from '../middleware/isAuth';
 import { Post } from '../entities/Post';
+import { ApolloContextType } from 'src/types';
+
+@InputType()
+class PostInput {
+  @Field()
+  title: string;
+  @Field()
+  text: string;
+}
 
 @Resolver()
 export class PostResolver {
@@ -9,20 +28,27 @@ export class PostResolver {
   }
 
   @Query(() => Post, { nullable: true })
-  post(@Arg('id') id: number): Promise<Post | null> {
+  post(@Arg('id') id: string): Promise<Post | null> {
     return Post.findOneBy({ id });
   }
 
   @Mutation(() => Post)
-  async createPost(@Arg('title') title: string): Promise<Post> {
-    const post = Post.create({ title });
+  @UseMiddleware(isAuth)
+  async createPost(
+    @Arg('input') input: PostInput,
+    @Ctx() ctx: ApolloContextType,
+  ): Promise<Post> {
+    const post = Post.create({
+      creatorId: ctx.req.session.userId,
+      ...input,
+    });
 
     return Post.save(post);
   }
 
   @Mutation(() => Post, { nullable: true })
   async updatePost(
-    @Arg('id') id: number,
+    @Arg('id') id: string,
     @Arg('title', () => String, { nullable: true }) title: string,
   ): Promise<Post | null> {
     const post = await Post.findOneBy({ id });
