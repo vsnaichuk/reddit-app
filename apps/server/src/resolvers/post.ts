@@ -45,6 +45,11 @@ export class PostResolver {
     const qb = appDataSource
       .getRepository(Post)
       .createQueryBuilder('post')
+      .innerJoinAndSelect(
+        'post.creator',
+        'user',
+        'user.id = post.creatorId',
+      )
       .orderBy('post.createdAt', 'DESC')
       .take(realLimitPlusOne);
 
