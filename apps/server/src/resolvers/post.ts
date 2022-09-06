@@ -10,7 +10,8 @@ import {
 } from 'type-graphql';
 import { isAuth } from '../middleware/isAuth';
 import { Post } from '../entities/Post';
-import { ApolloContextType } from 'src/types';
+import { ApolloContextType } from '../types';
+import { appDataSource } from '../appDataSource';
 
 @InputType()
 class PostInput {
@@ -22,9 +23,28 @@ class PostInput {
 
 @Resolver()
 export class PostResolver {
+  //TODO: Try offset base pagination
   @Query(() => [Post])
-  posts(): Promise<Post[]> {
-    return Post.find();
+  async posts(
+    @Arg('limit') limit: number,
+    @Arg('cursor', () => String, { nullable: true })
+    cursor: string | null,
+  ): Promise<Post[]> {
+    const realLimit = Math.min(50, limit);
+
+    const qb = appDataSource
+      .getRepository(Post)
+      .createQueryBuilder('post')
+      .orderBy('post.createdAt', 'DESC')
+      .take(realLimit);
+
+    if (cursor) {
+      qb.where('post.createdAt < :cursor', {
+        cursor: new Date(parseInt(cursor)),
+      });
+    }
+
+    return qb.getMany();
   }
 
   @Query(() => Post, { nullable: true })
