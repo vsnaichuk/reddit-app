@@ -4,6 +4,7 @@ import {
   Field,
   InputType,
   Mutation,
+  ObjectType,
   Query,
   Resolver,
   UseMiddleware,
@@ -21,22 +22,31 @@ class PostInput {
   text: string;
 }
 
+@ObjectType()
+class PaginatedPosts {
+  @Field(() => [Post])
+  posts: Post[];
+  @Field()
+  hasMore: boolean;
+}
+
 @Resolver()
 export class PostResolver {
   //TODO: Try offset base pagination
-  @Query(() => [Post])
+  @Query(() => PaginatedPosts)
   async posts(
     @Arg('limit') limit: number,
     @Arg('cursor', () => String, { nullable: true })
     cursor: string | null,
-  ): Promise<Post[]> {
+  ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
+    const realLimitPlusOne = realLimit + 1;
 
     const qb = appDataSource
       .getRepository(Post)
       .createQueryBuilder('post')
       .orderBy('post.createdAt', 'DESC')
-      .take(realLimit);
+      .take(realLimitPlusOne);
 
     if (cursor) {
       qb.where('post.createdAt < :cursor', {
@@ -44,7 +54,12 @@ export class PostResolver {
       });
     }
 
-    return qb.getMany();
+    const posts = await qb.getMany();
+
+    return {
+      posts: posts.slice(0, realLimit),
+      hasMore: posts.length === realLimitPlusOne,
+    };
   }
 
   @Query(() => Post, { nullable: true })
