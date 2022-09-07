@@ -3,11 +3,13 @@ import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   InputType,
   Mutation,
   ObjectType,
   Query,
   Resolver,
+  Root,
 } from 'type-graphql';
 import { User } from '../entities/User';
 import { ApolloContextType } from '../types';
@@ -41,8 +43,18 @@ class UserResponse {
   user?: User;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() ctx: ApolloContextType) {
+    // its ok to show current user his email
+    if (ctx.req.session.userId === user.id) {
+      return user.email;
+    }
+    // current user wants to see someone email
+    return '';
+  }
+
   @Mutation(() => UserResponse)
   async changePassword(
     @Arg('token') token: string,
