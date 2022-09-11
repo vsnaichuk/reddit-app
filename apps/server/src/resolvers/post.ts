@@ -144,4 +144,15 @@ export class PostResolver {
 
     return post;
   }
+
+  @Mutation(() => Post, { nullable: true })
+  @UseMiddleware(isAuth)
+  async deletePost(
+    @Arg('id') id: string,
+    @Ctx() ctx: ApolloContextType,
+  ): Promise<boolean> {
+    // Safely deleting only current user posts
+    await Post.delete({ id, creatorId: ctx.req.session.userId });
+    return true;
+  }
 }

@@ -13,6 +13,7 @@ import { HelloResolver } from './resolvers/hello';
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
 import { appDataSource } from './appDataSource';
+import { createUserLoader } from './utils/createUserLoader';
 
 (async () => {
   appDataSource.initialize();
@@ -71,6 +72,7 @@ import { appDataSource } from './appDataSource';
       req,
       res,
       redis,
+      userLoader: createUserLoader(),
     }),
     // This will allow POST operations from any client and GET operations from Apollo
     // Client Web, Apollo iOS, and Apollo Kotlin.
