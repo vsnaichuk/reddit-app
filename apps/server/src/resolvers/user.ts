@@ -13,9 +13,10 @@ import {
 } from 'type-graphql';
 import { User } from '../entities/User';
 import { ApolloContextType } from '../types';
-import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../constants';
+import { FORGET_PASSWORD_PREFIX } from '../constants';
 import { v4 as uuid } from 'uuid';
 import { sendEmail } from '../utils/sendEmail';
+import { createAccessToken } from '../utils/createToken';
 
 @InputType()
 class UsernamePasswordInput {
@@ -41,6 +42,8 @@ class UserResponse {
   errors?: FieldError[];
   @Field(() => User, { nullable: true })
   user?: User;
+  @Field(() => String, { nullable: true })
+  accessToken?: string;
 }
 
 @Resolver(User)
@@ -48,7 +51,7 @@ export class UserResolver {
   @FieldResolver(() => String)
   email(@Root() user: User, @Ctx() ctx: ApolloContextType) {
     // its ok to show current user his email
-    if (ctx.req.session.userId === user.id) {
+    if (ctx.payload?.userId === user.id) {
       return user.email;
     }
     // current user wants to see someone email
@@ -136,14 +139,14 @@ export class UserResolver {
 
   @Query(() => User, { nullable: true })
   me(@Ctx() ctx: ApolloContextType) {
+    const userId = ctx.payload?.userId;
+
     // you are not logged in
-    if (!ctx.req.session.userId) {
+    if (!userId) {
       return null;
     }
 
-    return User.findOneBy({
-      id: ctx.req.session.userId,
-    });
+    return User.findOneBy({ id: userId });
   }
 
   @Mutation(() => UserResponse)
@@ -176,6 +179,7 @@ export class UserResolver {
     const hashedPassword = await argon2.hash(options.password);
 
     let user: User | undefined;
+    let accessToken: string | undefined;
 
     try {
       user = User.create({
@@ -200,12 +204,12 @@ export class UserResolver {
     }
 
     if (user) {
-      // Store user id session
-      // this will set cookie and keep user logged in
-      ctx.req.session.userId = user.id;
+      // Store user id
+      ctx.payload = { userId: user.id };
+      accessToken = createAccessToken(user);
     }
 
-    return { user };
+    return { accessToken, user };
   }
 
   @Mutation(() => UserResponse)
@@ -244,30 +248,34 @@ export class UserResolver {
       };
     }
 
-    // Store user id session
-    // this will set cookie and keep user logged in
-    ctx.req.session.userId = user.id;
+    // Login successful
 
-    return { user };
+    // Store user id
+    ctx.payload = { userId: user.id };
+
+    return {
+      accessToken: createAccessToken(user),
+      user,
+    };
   }
 
-  @Mutation(() => Boolean)
-  logout(@Ctx() ctx: ApolloContextType) {
-    return new Promise((res) =>
-      ctx.req.session.destroy((err) => {
-        ctx.res.clearCookie(COOKIE_NAME, {
-          sameSite: 'none',
-          secure: true,
-        });
+  // @Mutation(() => Boolean)
+  // logout(@Ctx() ctx: ApolloContextType) {
+  //   return new Promise((res) =>
+  //     ctx.req.session.destroy((err) => {
+  //       ctx.res.clearCookie(COOKIE_NAME, {
+  //         sameSite: 'none',
+  //         secure: true,
+  //       });
 
-        if (err) {
-          console.log(err);
-          res(false);
-          return;
-        }
+  //       if (err) {
+  //         console.log(err);
+  //         res(false);
+  //         return;
+  //       }
 
-        res(true);
-      }),
-    );
-  }
+  //       res(true);
+  //     }),
+  //   );
+  // }
 }

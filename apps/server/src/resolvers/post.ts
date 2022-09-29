@@ -54,7 +54,7 @@ export class PostResolver {
       await appDataSource.transaction(async (em) => {
         await em.insert(Upvote, {
           postId,
-          userId: ctx.req.session.userId,
+          userId: ctx.payload?.userId,
           value: realValue,
         });
 
@@ -120,7 +120,7 @@ export class PostResolver {
     @Ctx() ctx: ApolloContextType,
   ): Promise<Post> {
     const post = Post.create({
-      creatorId: ctx.req.session.userId,
+      creatorId: ctx.payload?.userId,
       ...input,
     });
 
@@ -152,7 +152,7 @@ export class PostResolver {
     @Ctx() ctx: ApolloContextType,
   ): Promise<boolean> {
     // Safely deleting only current user posts
-    await Post.delete({ id, creatorId: ctx.req.session.userId });
+    await Post.delete({ id, creatorId: ctx.payload?.userId });
     return true;
   }
 }
