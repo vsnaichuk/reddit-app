@@ -98,7 +98,7 @@ export class UserResolver {
       };
     }
 
-    User.update(
+    await User.update(
       { id: userId },
       { password: await argon2.hash(newPassword) },
     );
@@ -179,14 +179,18 @@ export class UserResolver {
 
     try {
       user = User.create({
+        id: uuid(),
         email: options.email,
         username: options.username,
         password: hashedPassword,
       });
+      console.log('🚀 ~ user', user);
 
-      User.save(user);
+      await User.save(user);
     } catch (err) {
       // 23505 - username already exist
+      // TODO: Fix type
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (err.code === '23505') {
         return {
           errors: [

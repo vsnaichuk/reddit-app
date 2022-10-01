@@ -8,7 +8,7 @@ import session from 'express-session';
 import connectRedis from 'connect-redis';
 import cors from 'cors';
 
-import { COOKIE_NAME, __prod__ } from './constants';
+import { COOKIE_NAME } from './constants';
 import { HelloResolver } from './resolvers/hello';
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
@@ -16,7 +16,7 @@ import { appDataSource } from './appDataSource';
 import { createUserLoader } from './utils/createUserLoader';
 
 (async () => {
-  appDataSource.initialize();
+  await appDataSource.initialize();
 
   // init app
   const app = express();
